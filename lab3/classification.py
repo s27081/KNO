@@ -74,31 +74,24 @@ def build_model_two():
     return model
 
 
-def build_test_and_plot(model, X_train, X_test, y_train, y_test, epochs):
+def build_test_and_plot(model, X_train, X_test, y_train, y_test, epochs, batch_size):
     model.compile(
         optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
     )
 
-    history = model.fit(X_train, y_train, epochs=epochs, validation_split=0.2)
+    history = model.fit(
+        X_train, y_train, epochs=epochs, validation_split=0.2, batch_size=batch_size
+    )
     loss, accuracy = model.evaluate(X_test, y_test)
     print(f"Validation Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
 
-    predictions = model.predict(X_test)
+    model.predict(X_test)
 
     plt.figure(figsize=(12, 5))
 
-    plt.subplot(1, 2, 1)
-    plt.plot(history.history["loss"], label="Training Loss")
-    plt.plot(history.history["val_loss"], label="Validation Loss")
-    plt.title("Loss Curves")
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
-    plt.legend()
-
-    plt.subplot(1, 2, 2)
     plt.plot(history.history["accuracy"], label="Training Accuracy")
     plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
-    plt.title("Accuracy Curves")
+    plt.title("Traning data")
     plt.xlabel("Epochs")
     plt.ylabel("Accuracy")
     plt.legend()
@@ -110,10 +103,10 @@ def build_test_and_plot(model, X_train, X_test, y_train, y_test, epochs):
 
 
 model_one, accuracy_one = build_test_and_plot(
-    build_model_one(), X_train, X_test, y_train, y_test, 300
+    build_model_one(), X_train, X_test, y_train, y_test, 50, 15
 )
 model_two, accuracy_two = build_test_and_plot(
-    build_model_two(), X_train, X_test, y_train, y_test, 300
+    build_model_two(), X_train, X_test, y_train, y_test, 50, 15
 )
 
 if accuracy_one > accuracy_two:
@@ -127,14 +120,15 @@ def main():
     parser.add_argument("-w", "--wine", type=float, nargs=13)
     args = parser.parse_args()
 
-    user_input = np.array(args.wine).reshape(1, -1)
-    user_input_scaled = scaler.transform(user_input)
+    if args.wine:
+        user_input = np.array(args.wine).reshape(1, -1)
+        user_input_scaled = scaler.transform(user_input)
 
-    model = tf.keras.models.load_model("best_model.keras")
-    prediction = model.predict(user_input_scaled)
-    predicted_class = np.argmax(prediction, axis=1)[0] + 1
+        model = tf.keras.models.load_model("best_model.keras")
+        prediction = model.predict(user_input_scaled)
+        predicted_class = np.argmax(prediction, axis=1)[0] + 1
 
-    print(f"Predicted wine class: {predicted_class}")
+        print(f"Predicted wine class: {predicted_class}")
 
 
 if __name__ == "__main__":
