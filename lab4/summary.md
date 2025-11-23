@@ -43,7 +43,10 @@ max_trials=5
     - units: 16
     - dropout: 0.0
     - learning-rate: 0.0069
+
+
 **Macierz pomyłek**:
+
 Serwer:
 ```bash
 [[15  0  0]
