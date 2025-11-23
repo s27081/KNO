@@ -63,11 +63,11 @@ def build_hp_model(hp):
         [
             data_normalizer,
             tf.keras.layers.Dense(hp.Choice("units", [8, 16, 32]), activation="relu"),
-            tf.keras.layers.Dropout(hp.Float("dropout", 0.0, 0.5, step=0.1)),
+            tf.keras.layers.Dropout(hp.Float("dropout", 0.0, 0.6, step=0.1)),
             tf.keras.layers.Dense(3, activation="softmax"),
         ]
     )
-    learninig_rate = hp.Float("lr", 1e-4, 1e-2, sampling="log")
+    learninig_rate = hp.Float("lr", 1e-3, 1e-2, sampling="log")
 
     model.compile(
         optimizer=tf.optimizers.Adam(learning_rate=learninig_rate),
@@ -87,18 +87,15 @@ def build_and_test(model, X_train, X_test, y_train, y_test, epochs, batch_size):
         X_train, y_train, epochs=epochs, validation_split=0.2, batch_size=batch_size
     )
     loss, accuracy = model.evaluate(X_test, y_test)
-    print(f"Validation Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
 
     model.predict(X_test)
 
-    return model, accuracy, history
+    return model, accuracy, history, loss
 
 
-base_model, accuracy, history = build_and_test(
+base_model, base_accuracy, history, base_loss = build_and_test(
    build_base_model(), X_train, X_test, y_train, y_test, 50, 15
 )
-
-base_accuracy = history.history["val_accuracy"][-1]
 
 base_model.save("base_model.keras")
 
@@ -109,7 +106,9 @@ tuner = kt.RandomSearch(
     project_name="wine_prediction")
 
 tuner.search(X_train, y_train, epochs=5, validation_data=(X_test, y_test))
+
 best_model = tuner.get_best_models()[0]
+best_loss, best_accuracy = best_model.evaluate(X_test, y_test)
 best_hyperparameters = tuner.get_best_hyperparameters()[0]
 
 best_model.save("best_hp_model.keras")
@@ -121,25 +120,9 @@ cm = confusion_matrix(y_true, y_pred)
 
 print("========")
 print("Base Model Validation Accuracy:", base_accuracy)
-print("Hyperparameters Model Validation Accuracy", best_model)
+print("Base Model Validation Loss:", base_loss)
+print("Hyperparameters Model Validation Accuracy", best_accuracy)
+print("Hyperparameters Model Validation Loss", best_loss)
 print("Hyperparameters: ", best_hyperparameters.values)
 print("\nConfusion matrix:")
 print(cm)
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-w", "--wine", type=float, nargs=13)
-    args = parser.parse_args()
-
-    if args.wine:
-        user_input = np.array(args.wine).reshape(1, -1)
-
-        model = tf.keras.models.load_model("model.keras")
-        prediction = model.predict(user_input)
-        predicted_class = np.argmax(prediction, axis=1)[0] + 1
-
-        print(f"Predicted wine class: {predicted_class}")
-
-
-if __name__ == "__main__":
-    main()
