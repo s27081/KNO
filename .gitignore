@@ -1,2 +1,8 @@
 .idea
 .venv
+venv
+*.cfg
+*/__pycache__
+*.keras
+*.png
+wine_prediction
