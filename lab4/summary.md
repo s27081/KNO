@@ -33,6 +33,7 @@ max_trials=5
 - Lokalnie:
   - Accuracy 0.9722222089767456
   - Loss 0.24113532900810242
+
 **z parametrami:**
 - Serwer:
     - units: 32
