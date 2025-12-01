@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import joblib
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import argparse
@@ -34,6 +35,7 @@ y = data["Class"].values - 1
 
 y = tf.keras.utils.to_categorical(y, num_classes=3)
 
+global scaler
 scaler = StandardScaler()
 X = scaler.fit_transform(X)
 
@@ -97,9 +99,8 @@ def build_test_and_plot(model, X_train, X_test, y_train, y_test, epochs, batch_s
     plt.legend()
 
     plt.show()
-    plt.savefig("model.png")
 
-    return model, accuracy
+    return model, accuracy, loss
 
 
 model_one, accuracy_one = build_test_and_plot(
@@ -113,7 +114,7 @@ if accuracy_one > accuracy_two:
     model_one.save("best_model.keras")
 else:
     model_two.save("best_model.keras")
-
+joblib.dump(scaler, "scaler.save")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -121,10 +122,13 @@ def main():
     args = parser.parse_args()
 
     if args.wine:
-        user_input = np.array(args.wine).reshape(1, -1)
-        user_input_scaled = scaler.transform(user_input)
 
         model = tf.keras.models.load_model("best_model.keras")
+        scaler = joblib.load("scaler.save")
+
+        user_input = np.array(args.wine).reshape(1, -1)
+        user_input_scaled = scaler.transform(user_input)
+        
         prediction = model.predict(user_input_scaled)
         predicted_class = np.argmax(prediction, axis=1)[0] + 1
 
