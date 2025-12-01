@@ -1,23 +1,33 @@
 1. Opis modeli
 
 Model 1
-
-Prosty model, szybki w uczeniu jest naszym naszym punktem odniesienai.
+- Inuput (13) 
+- Dense(10, activation="relu")
+- Dense(3, activation="softmax")
 
 Model 2
+- Inuput (13) 
+- Dense(16, activation="tanh", kernel_initializer="lecun_uniform, name="hidden_layer_one")
+- Dropout(0.3, name="dropout")
+- Dense(8, activation="relu", kernel_initializer="he_normal", name="hiddwen_layer_two")
+- Dense(3, activation="softmax", name="Output")
 
-Model ma więcej warst, różne typy aktywacji i regularyzację, co pozwala mu  uczyć się lepiej.
+Paramtery: 
+- Optimizer: Adam(lr=default(0.001))
+- Epochs: 50
+- Batch_size: 15 
 
 2. Krzywe uczenia
 
 Model 1
 ![img_1.png](img_1.png)
-Dokładność: 94% - model szybko osiąga wysoką dokładność, bez większych wachań
+Dokładność: 94% - model szybko osiąga wysoką dokładność, bez większych wachań, strata: 0.2208
 
 Model 2
 ![img.png](img.png)
-Dokładność: 97% - model szybciej osiąga wysoką dokładność, ale ma większe wachania
+Dokładność: 97% - model szybciej osiąga wysoką dokładność, ale ma większe wachania, strata: 0.1070
 
 3. Wnioski
 
-Lepszy wynik osiągnął model 2 dzięki większej ilości warstw, dropoutowi i różnym funkcjom aktywacji przez co jest bardziej elastyczny i odporny na przeuczenie.
+Model 2 osiągnął większą dokładność od modelu 1 w klasyfikacji win
+Oba modele są zdolne do identyfikacji wina z wysoką dokładnością
