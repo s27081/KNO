@@ -100,7 +100,7 @@ def build_test_and_plot(model, X_train, X_test, y_train, y_test, epochs, batch_s
 
     plt.show()
 
-    return model, accuracy, loss
+    return model, accuracy
 
 
 model_one, accuracy_one = build_test_and_plot(
