@@ -6,6 +6,7 @@ import keras_tuner as kt
 import argparse
 from sklearn.metrics import confusion_matrix
 
+
 def prepare_data():
     fashion_mnist = keras.datasets.fashion_mnist
     (train_images, train_labels), (test_images, test_labels) = fashion_mnist.load_data()
@@ -30,12 +31,12 @@ def build_dense_model(hp=None):
 
     model = keras.Sequential(
         [
-            keras.layers.Flatten(input_shape=(28, 28,1)),
+            keras.layers.Flatten(input_shape=(28, 28, 1)),
             keras.layers.Dense(units=hp_units, activation="relu"),
             keras.layers.Dropout(dropout_rate),
             keras.layers.Dense(10, activation="softmax"),
         ],
-        name="dense"
+        name="dense",
     )
 
     model.compile(
@@ -48,7 +49,7 @@ def build_dense_model(hp=None):
 
 def build_conv_model(hp=None):
     if hp:
-        hp_filters = hp.Choice('filters', [32, 64, 96])
+        hp_filters = hp.Choice("filters", [32, 64, 96])
         learning_rate = hp.Float("lr", 1e-3, 1e-2, sampling="log")
     else:
         hp_filters = 32
@@ -56,7 +57,9 @@ def build_conv_model(hp=None):
 
     model = keras.Sequential(
         [
-            keras.layers.Conv2D(hp_filters, (3, 3), activation="relu", input_shape=(28, 28, 1)),
+            keras.layers.Conv2D(
+                hp_filters, (3, 3), activation="relu", input_shape=(28, 28, 1)
+            ),
             keras.layers.MaxPooling2D((2, 2)),
             keras.layers.Conv2D(64, (3, 3), activation="relu"),
             keras.layers.MaxPooling2D((2, 2)),
@@ -64,7 +67,7 @@ def build_conv_model(hp=None):
             keras.layers.Dense(64, activation="relu"),
             keras.layers.Dense(10, activation="softmax"),
         ],
-        name="conv"
+        name="conv",
     )
 
     model.compile(
@@ -102,28 +105,30 @@ def test_evaluate_and_save(model, epochs, batch_size, image_data):
 
     return model, accuracy, history, loss
 
+
 def use_tuner(model, model_name, image_data, epochs=5, batch_size=32):
     train_images, train_labels, test_images, test_labels = image_data
     tuner = kt.RandomSearch(
-                model,
-                objective='val_accuracy',
-                max_trials=10,
-                directory='tuning_results',
-                project_name=model_name
-        )
-    
+        model,
+        objective="val_accuracy",
+        max_trials=10,
+        directory="tuning_results",
+        project_name=model_name,
+    )
+
     tuner.search(
-            train_images, 
-            train_labels, 
-            epochs=epochs, 
-            validation_data=(test_images, test_labels)
-        )
+        train_images,
+        train_labels,
+        epochs=epochs,
+        validation_data=(test_images, test_labels),
+    )
     best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
     best_model = tuner.get_best_models(num_models=1)[0]
-        
+
     print("\n--- Najlepsze Hiperparametry ---")
     print(best_hps.values)
     test_evaluate_and_save(best_model, epochs, batch_size, image_data)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -132,13 +137,19 @@ def main():
 
     image_data = prepare_data()
     if args.tuner is True:
-        use_tuner(build_conv_model,"conv_model", image_data)
+        use_tuner(build_conv_model, "conv_model", image_data)
         use_tuner(build_dense_model, "dense_model", image_data)
     else:
         dense_model = build_dense_model()
         conv_model = build_conv_model()
-        test_evaluate_and_save(dense_model, epochs=5, batch_size=32, image_data=image_data)
+        test_evaluate_and_save(
+            dense_model, epochs=5, batch_size=32, image_data=image_data
+        )
 
-        test_evaluate_and_save(conv_model, epochs=5, batch_size=32, image_data=image_data)
+        test_evaluate_and_save(
+            conv_model, epochs=5, batch_size=32, image_data=image_data
+        )
+
+
 if __name__ == "__main__":
     main()
