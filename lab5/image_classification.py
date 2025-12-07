@@ -107,7 +107,7 @@ def use_tuner(model, model_name, image_data, epochs=5, batch_size=32):
     tuner = kt.RandomSearch(
                 model,
                 objective='val_accuracy',
-                max_trials=1,
+                max_trials=10,
                 directory='tuning_results',
                 project_name=model_name
         )
@@ -127,12 +127,11 @@ def use_tuner(model, model_name, image_data, epochs=5, batch_size=32):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tuner", "-t", type=bool, default=False)
+    parser.add_argument("--tuner", "-t", action="store_true")
     args = parser.parse_args()
-    is_tuner = args.tuner
 
     image_data = prepare_data()
-    if is_tuner:
+    if args.tuner is True:
         use_tuner(build_conv_model,"conv_model", image_data)
         use_tuner(build_dense_model, "dense_model", image_data)
     else:
