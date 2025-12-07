@@ -6,3 +6,8 @@ venv
 *.keras
 *.png
 wine_prediction
+tuning_results
+*.txt
+*.jpg
+*.save
+*.DS_Store
