@@ -102,13 +102,14 @@ def test_evaluate_and_save(model, epochs, batch_size, image_data):
 
     return model, accuracy, history, loss
 
-def use_tuner(model, image_data, epochs=5, batch_size=32):
+def use_tuner(model, model_name, image_data, epochs=5, batch_size=32):
     train_images, train_labels, test_images, test_labels = image_data
     tuner = kt.RandomSearch(
-                hypermodel=build_conv_model,
+                model,
                 objective='val_accuracy',
-                max_trials=5,
-                directory='tuning_results'
+                max_trials=1,
+                directory='tuning_results',
+                project_name=model_name
         )
     
     tuner.search(
@@ -132,8 +133,8 @@ def main():
 
     image_data = prepare_data()
     if is_tuner:
-        use_tuner(build_conv_model, image_data)
-        use_tuner(build_dense_model, image_data)
+        use_tuner(build_conv_model,"conv_model", image_data)
+        use_tuner(build_dense_model, "dense_model", image_data)
     else:
         dense_model = build_dense_model()
         conv_model = build_conv_model()
